@@ -1,4 +1,5 @@
 require File.expand_path("../spec_helper", File.dirname(__FILE__))
+require File.expand_path("../helpers/search_helper", File.dirname(__FILE__))
 
 describe "field grouping" do
   before :each do
@@ -61,5 +62,36 @@ describe "field grouping" do
 
     title1_group = search.group(:title).groups.detect { |g| g.value == "Title1" }
     title1_group.hits.first.primary_key.to_i.should == highest_ranked_post.id
+  end
+  
+  it "gives correct ngroups count when ngroups is true" do
+    search = Sunspot.search(Post) do
+      group :title do
+        ngroups true
+      end
+    end
+    
+    search.group(:title).ngroups.should == 2
+  end
+  
+  it "should return flat list (aka 1 group) when gformat == simple" do
+    search = Sunspot.search(Post) do
+      group :title do
+        gformat 'simple'
+      end
+    end
+    
+    search.groups.size.should == 1
+  end
+  
+  it "should return flat result if main == true" do
+    search = Sunspot.search(Post) do
+      group :title do
+        main true
+      end
+    end
+    
+    search.total.should == 3
+    
   end
 end
